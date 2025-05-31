@@ -15,4 +15,7 @@ public interface LibroRepositorio extends JpaRepository<Libro, Long> {
     @EntityGraph(attributePaths = {"autor"})
     List<Libro> findAllBy();
 
+    @EntityGraph(attributePaths = {"autor"})
+    List<Libro> findAllByIdioma(String idioma);
+
 }

@@ -56,6 +56,21 @@ public class Principal {
     }
 
     private static void listarLibrosPorIdioma() {
+        List<String> idiomas = obtenerIdiomas();
+        System.out.print("Elija la opción a través de su número: ");
+        var opcion2 = TECLADO.nextLine();
+        var indice = obtenerEntero(opcion2) - 1;
+        if (indice >= 0 && indice < idiomas.size()) {
+            List<Libro> libros = libroRepositorio.findAllByIdioma(idiomas.get(indice));
+            if (libros.isEmpty()) {
+                System.out.printf("No se encontraron libros con el idioma %s", idiomas.get(indice));
+                return;
+            }
+            libros.forEach(Principal::mostrarLibro);
+            return;
+        }
+        if (indice == -1) return;
+        System.out.println("¡Opción inválida, intenta de nuevo!");
     }
 
     private static void listarAutoresVivos() {
@@ -187,6 +202,21 @@ public class Principal {
                 ************* ***** *********************
                 """, autor.getNombre(), autor.getAnioNacimiento(), autor.getAnioMuerte(),
                 autor.getLibros().stream().map(Libro::getTitulo).collect(Collectors.joining(" || ")));
+    }
+
+    private static List<String> obtenerIdiomas() {
+        System.out.println("""
+                **************************************************
+                1 - es -> español
+                2 - en -> inglés
+                3 - fr -> francés
+                4 - pt -> portugués
+                5 - it -> italiano
+                6 - fi -> finlandés
+                
+                0 - Regresar al menú anterior
+                """);
+        return List.of("es", "en", "fr", "pt", "it", "fi");
     }
 
 }
