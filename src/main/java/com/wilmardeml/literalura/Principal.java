@@ -114,7 +114,30 @@ public class Principal {
     }
 
     private static void registrarLibro(DatosLibro datosLibro) {
-        System.out.println("Aquí se registrará el libro en base de datos");
+        System.out.println("Registrando libro en base de datos...");
+
+        Libro nuevoLibro = new Libro(datosLibro);
+        Autor autor = new Autor(datosLibro.autores().getFirst());
+
+        nuevoLibro.setAutor(autor);
+        autor.getLibros().add(nuevoLibro);
+
+        autorRepositorio.save(autor); // Salva también el libro porque está en Cascade.ALL
+
+        System.out.println("Libro ".concat(nuevoLibro.getTitulo()).concat(" registrado satisfactoriamente!"));
+        mostrarLibro(nuevoLibro);
+    }
+
+    private static void mostrarLibro(Libro libro) {
+        System.out.printf("""
+                
+                ************* LIBRO *********************
+                Título: %s
+                Autor: %s
+                Idioma: %s
+                Número de descargas: %d
+                ************* ***** *********************
+                """, libro.getTitulo(), libro.getAutor().getNombre(), libro.getIdioma(), libro.getNumeroDescargas());
     }
 
 }
