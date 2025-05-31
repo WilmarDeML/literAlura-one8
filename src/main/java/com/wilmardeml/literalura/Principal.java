@@ -8,6 +8,7 @@ import com.wilmardeml.literalura.servicios.ConvierteDatos;
 
 import java.util.List;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 
 public class Principal {
     private final static Scanner TECLADO = new Scanner(System.in);
@@ -61,6 +62,10 @@ public class Principal {
     }
 
     private static void listarAutores() {
+        List<Autor> autores = autorRepositorio.findAllBy();
+        System.out.println("******************* Autores Registrados **************************");
+        autores.forEach(Principal::mostrarAutor);
+        System.out.println("******************* Fin Autores Registrados **************************");
     }
 
     private static void listarLibros() {
@@ -156,6 +161,19 @@ public class Principal {
                 Número de descargas: %d
                 ************* ***** *********************
                 """, libro.getTitulo(), libro.getAutor().getNombre(), libro.getIdioma(), libro.getNumeroDescargas());
+    }
+
+    private static void mostrarAutor(Autor autor) {
+        System.out.printf("""
+                
+                ************* Autor *********************
+                Autor: %s
+                Fecha de nacimiento: %d
+                Fecha de fallecimiento: %d
+                Libros: [%s]
+                ************* ***** *********************
+                """, autor.getNombre(), autor.getAnioNacimiento(), autor.getAnioMuerte(),
+                autor.getLibros().stream().map(Libro::getTitulo).collect(Collectors.joining(" || ")));
     }
 
 }
