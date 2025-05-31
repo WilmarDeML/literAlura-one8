@@ -59,6 +59,19 @@ public class Principal {
     }
 
     private static void listarAutoresVivos() {
+        System.out.print("Ingrese el año vivo de autor(es) que desea buscar: ");
+        var opcion2 = TECLADO.nextLine();
+        var anio = obtenerEntero(opcion2);
+
+        if (anio == -1) {
+            System.out.println("¡Año no válido, intenta de nuevo!");
+            return;
+        }
+
+        List<Autor> autores = autorRepositorio.findByAnioMuerteGreaterThanAndAnioNacimientoLessThan(anio, anio);
+        System.out.printf("******************* Autores vivos en %d **************************", anio);
+        autores.forEach(Principal::mostrarAutor);
+        System.out.printf("******************* Fin Autores vivos en %d **************************%n", anio);
     }
 
     private static void listarAutores() {

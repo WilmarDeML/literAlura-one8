@@ -14,4 +14,7 @@ public interface AutorRepositorio extends JpaRepository<Autor, Long> {
     @EntityGraph(attributePaths = {"libros"})
     List<Autor> findAllBy();
 
+    @EntityGraph(attributePaths = {"libros"})
+    List<Autor> findByAnioMuerteGreaterThanAndAnioNacimientoLessThan(int anioMuerte, int anioNacimiento);
+
 }
