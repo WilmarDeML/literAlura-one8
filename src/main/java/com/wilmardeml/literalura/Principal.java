@@ -64,6 +64,10 @@ public class Principal {
     }
 
     private static void listarLibros() {
+        List<Libro> libros = libroRepositorio.findAllBy();
+        System.out.println("******************* Libros Registrados **************************");
+        libros.forEach(Principal::mostrarLibro);
+        System.out.println("******************* Fin Libros Registrados **************************");
     }
 
     private static void buscarLibroPorTitulo() {
