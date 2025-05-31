@@ -1,12 +1,26 @@
 package com.wilmardeml.literalura;
 
+import com.wilmardeml.literalura.modelos.*;
+import com.wilmardeml.literalura.repositorios.AutorRepositorio;
+import com.wilmardeml.literalura.repositorios.LibroRepositorio;
+import com.wilmardeml.literalura.servicios.ConsumoAPI;
+import com.wilmardeml.literalura.servicios.ConvierteDatos;
+
+import java.util.List;
 import java.util.Scanner;
 
 public class Principal {
     private final static Scanner TECLADO = new Scanner(System.in);
+    private final static String URL_BASE = "https://gutendex.com/books/?search=";
+
+    private static LibroRepositorio libroRepositorio;
+    private static AutorRepositorio autorRepositorio;
+
     private static String opcion = "-1";
 
-    public static void init() {
+    public static void init(LibroRepositorio lRepositorio, AutorRepositorio aRepositorio) {
+        libroRepositorio = lRepositorio;
+        autorRepositorio = aRepositorio;
         while (!opcion.equals("0")) {
             mostrarMenu();
             System.out.print("Elija la opción a través de su número: ");
