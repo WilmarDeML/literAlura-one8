@@ -67,5 +67,54 @@ public class Principal {
     }
 
     private static void buscarLibroPorTitulo() {
+        System.out.print("Ingrese el nombre del libro que desea buscar: ");
+        var titulo = TECLADO.nextLine();
+        String bodyResponse = ConsumoAPI.obtenerDatos(URL_BASE.concat(titulo.replace(" ", "+")));
+        ResponseApi result = ConvierteDatos.convertirJsonStringA(bodyResponse, ResponseApi.class);
+        if (result.totalLibros().equals(0)) {
+            System.out.println("El libro ".concat(titulo).concat(" no fue encontrado!"));
+            return;
+        }
+        if (result.totalLibros() == 1) {
+            registrarLibro(result.libros().getFirst());
+            return;
+        }
+
+        elegirLibroParaRegistrar(result.libros(), result.totalLibros());
     }
+
+    private static void elegirLibroParaRegistrar(List<DatosLibro> libros, Integer totalLibros) {
+        System.out.printf("%d / %d libros%n", libros.size(), totalLibros);
+        for (int i = 0; i < libros.size(); i++) {
+            var libro = libros.get(i);
+            System.out.println((i + 1) + " - "
+                    .concat(libro.titulo()).concat(" - ")
+                    .concat(libro.autores().isEmpty() ? "-" : libro.autores().getFirst().nombre()).concat(" - ")
+                    .concat(String.valueOf(libro.numeroDescargas())));
+        }
+        System.out.print("Elija la opción a través de su número o 0 para regresar al menú anterior: ");
+        while (true) {
+            var opcion2 = TECLADO.nextLine();
+            int indice = obtenerEntero(opcion2) - 1;
+            if (indice >= 0 && indice <= libros.size()) {
+                registrarLibro(libros.get(indice));
+                return;
+            }
+            if (indice == -1) return;
+            System.out.println("Elige una opción válida: ");
+        }
+    }
+
+    private static int obtenerEntero(String opcion2) {
+        try {
+            return Integer.parseInt(opcion2);
+        } catch (NumberFormatException e) {
+            return -1;
+        }
+    }
+
+    private static void registrarLibro(DatosLibro datosLibro) {
+        System.out.println("Aquí se registrará el libro en base de datos");
+    }
+
 }
