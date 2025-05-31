@@ -1,10 +1,10 @@
-package com.wilmardeml.leteralura;
+package com.wilmardeml.literalura;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class LeteraluraApplicationTests {
+class LiteraluraApplicationTests {
 
 	@Test
 	void contextLoads() {
