@@ -114,10 +114,24 @@ public class Principal {
     }
 
     private static void registrarLibro(DatosLibro datosLibro) {
+        var libroBuscado = libroRepositorio.findByTitulo(datosLibro.titulo());
+        if (libroBuscado != null) {
+            System.out.println("¡El libro ".concat(libroBuscado.getTitulo()).concat(" ya está registrado!"));
+            mostrarLibro(libroBuscado);
+            return;
+        }
+        if (datosLibro.autores().isEmpty()) {
+            datosLibro.autores().add(new DatosAutor("Sin autor", 0, 0));
+        }
+
         System.out.println("Registrando libro en base de datos...");
 
         Libro nuevoLibro = new Libro(datosLibro);
-        Autor autor = new Autor(datosLibro.autores().getFirst());
+        Autor autor = autorRepositorio.findByNombre(datosLibro.autores().getFirst().nombre());
+
+        if (autor == null) {
+            autor = new Autor(datosLibro.autores().getFirst());
+        }
 
         nuevoLibro.setAutor(autor);
         autor.getLibros().add(nuevoLibro);
