@@ -13,7 +13,7 @@ public interface AutorRepositorio extends JpaRepository<Autor, Long> {
     Autor findByNombre(String nombre);
 
     @EntityGraph(attributePaths = {"libros"})
-    List<Autor> findAllBy();
+    List<Autor> findAllByOrderByNombre();
 
     @EntityGraph(attributePaths = {"libros"})
     List<Autor> findByAnioMuerteGreaterThanAndAnioNacimientoLessThan(int anioMuerte, int anioNacimiento);

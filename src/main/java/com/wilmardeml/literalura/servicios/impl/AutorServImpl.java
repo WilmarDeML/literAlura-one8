@@ -37,6 +37,6 @@ public class AutorServImpl implements AutorServ {
 
     @Override
     public List<Autor> listarTodo() {
-        return autorRepositorio.findAllBy();
+        return autorRepositorio.findAllByOrderByNombre();
     }
 }
