@@ -116,7 +116,7 @@ public class Principal {
                 .mapToDouble(DatosLibro::numeroDescargas)
                 .summaryStatistics();
 
-        mostrarEstadistica(estadistica, "Libros registrados:");
+        mostrarEstadistica(estadistica, "Libros API:");
     }
 
     private void generarEstadisticasLibrosRegistrados() {
