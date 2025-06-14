@@ -181,14 +181,18 @@ public class Principal {
     }
 
     private void buscarLibroPorTitulo() {
-        System.out.print("Ingrese el nombre del libro que desea buscar: ");
-        var titulo = TECLADO.nextLine();
-        String bodyResponse = ConsumoAPI.obtenerDatos(URL_BASE.concat("?search=").concat(titulo.replace(" ", "+")));
-        ResponseApi result = ConvierteDatos.convertirJsonStringA(bodyResponse, ResponseApi.class);
-        if (result.totalLibros().equals(0)) {
+        ResponseApi result;
+        while (true) {
+            System.out.print("Ingrese el nombre del libro que desea buscar: ");
+            var titulo = TECLADO.nextLine();
+            String bodyResponse = ConsumoAPI.obtenerDatos(URL_BASE.concat("?search=").concat(titulo.replace(" ", "+")));
+            result = ConvierteDatos.convertirJsonStringA(bodyResponse, ResponseApi.class);
+
+            if (!result.totalLibros().equals(0)) break;
+
             System.out.println("El libro ".concat(titulo).concat(" no fue encontrado!"));
-            return;
         }
+
         if (result.totalLibros() == 1) {
             registrarLibro(result.libros().getFirst());
             return;

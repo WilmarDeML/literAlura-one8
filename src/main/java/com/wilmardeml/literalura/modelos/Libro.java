@@ -8,6 +8,7 @@ public class Libro {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     private String titulo;
 
     @ManyToOne(cascade = CascadeType.ALL)
