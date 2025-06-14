@@ -232,12 +232,33 @@ public class Principal {
     }
 
     private void registrarLibro(DatosLibro datosLibro) {
-        var libroBuscado = servicioLibros.buscarPorTitulo(datosLibro.titulo());
+        if (libroYaExiste(datosLibro.titulo())) return;
+
+        System.out.println("Se guardará el libro ".concat(datosLibro.titulo()));
+        while (true) {
+            mostrarSiNo();
+            opcion = TECLADO.nextLine();
+            if (opcion.equals("2")) {
+                System.out.println("¡No se guardó el libro!");
+                return;
+            }
+            if (opcion.equals("1")) break;
+            System.out.println("Elija 1 para guardar el registro o 2 para regresar");
+        }
+
+        guardarLibroYAutor(datosLibro);
+    }
+
+    private boolean libroYaExiste(String titulo) {
+        var libroBuscado = servicioLibros.buscarPorTitulo(titulo);
         if (libroBuscado != null) {
             System.out.println("¡El libro ".concat(libroBuscado.getTitulo()).concat(" ya está registrado!"));
             mostrarLibro(libroBuscado);
-            return;
         }
+        return libroBuscado != null;
+    }
+
+    private void guardarLibroYAutor(DatosLibro datosLibro) {
         if (datosLibro.autores().isEmpty()) {
             datosLibro.autores().add(new DatosAutor("Sin autor", 0, 0));
         }
@@ -258,6 +279,15 @@ public class Principal {
 
         System.out.println("Libro ".concat(nuevoLibro.getTitulo()).concat(" registrado satisfactoriamente!"));
         mostrarLibro(nuevoLibro);
+    }
+
+    private void mostrarSiNo() {
+        System.out.print("""
+                1 - Sí
+                2 - No
+                
+                Elija la opción a través de su número:
+                """);
     }
 
     private static void mostrarLibro(Libro libro) {
