@@ -32,6 +32,6 @@ public class LibroServImpl implements LibroServ {
 
     @Override
     public List<Libro> listarTodo() {
-        return libroRepositorio.findAllBy();
+        return libroRepositorio.findAllByOrderByTitulo();
     }
 }

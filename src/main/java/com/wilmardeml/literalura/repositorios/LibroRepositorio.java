@@ -13,7 +13,7 @@ public interface LibroRepositorio extends JpaRepository<Libro, Long> {
 
     // @Query("SELECT l FROM Libro l JOIN FETCH l.autor") // Hace lo mismo que la anotación @EntityGraph
     @EntityGraph(attributePaths = {"autor"})
-    List<Libro> findAllBy();
+    List<Libro> findAllByOrderByTitulo();
 
     @EntityGraph(attributePaths = {"autor"})
     List<Libro> findAllByIdioma(String idioma);
