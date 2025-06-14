@@ -8,5 +8,6 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record ResponseApi(
         @JsonProperty("results") List<DatosLibro> libros,
-        @JsonProperty("count") Integer totalLibros
+        @JsonProperty("count") Integer totalLibros,
+        @JsonProperty("next") String siguientePagina
 ) {}

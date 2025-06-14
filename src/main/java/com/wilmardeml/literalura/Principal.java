@@ -38,24 +38,99 @@ public class Principal {
                 3 - Listar autores registrados
                 4 - Listar autores vivos en un determinado año
                 5 - Listar libros por idioma
+                6 - Generar estadísticas de libros registrados
+                7 - Generar estadísticas de libros Api (Primeras 20 páginas)
+                8 - Top 10 Api (Primeras 20 páginas)
+                9 - Top 10 libros registrados
+                10 - Buscar Autor por nombre
                 
                 0 - Salir
                 """);
     }
 
-    private static void tratarOpcion() {
+    private void tratarOpcion() {
         switch (opcion) {
             case "1" -> buscarLibroPorTitulo();
             case "2" -> listarLibros();
             case "3" -> listarAutores();
             case "4" -> listarAutoresVivos();
             case "5" -> listarLibrosPorIdioma();
+            case "6" -> generarEstadisticasLibrosRegistrados();
+            case "7" -> generarEstadisticasLibrosApi();
+            case "8" -> listarTop10Api();
+            case "9" -> listarTop10LibrosRegistrados();
+            case "10" -> buscarAutorPorNombre();
             case "0" -> System.out.printf("%n... Cerrando aplicación ¡Gracias!%n%n");
             default -> System.out.printf("%nOpción no válida intente con otra opción%n");
         }
     }
 
-    private static void listarLibrosPorIdioma() {
+    private void buscarAutorPorNombre() {
+        System.out.print("Ingrese el nombre del autor que desea buscar: ");
+        var nombreAutor = TECLADO.nextLine();
+        List<Autor> autoresEncontrados = servicioAutores.filtrarPorNombre(nombreAutor);
+        if (autoresEncontrados.isEmpty()) {
+            System.out.println("No se halló un autor que contenga en el nombre ".concat(nombreAutor));
+            return;
+        }
+
+        System.out.printf(
+                "********** Autores que contienen '%s' en su nombre **********************************%n", nombreAutor);
+        autoresEncontrados.forEach(Principal::mostrarAutor);
+        System.out.println("\n********** Fin Autores **********************************");
+    }
+
+    private void listarTop10LibrosRegistrados() {
+        List<Libro> libros = servicioLibros.listarTop10();
+        libros.forEach(Principal::mostrarLibro);
+    }
+
+    private void listarTop10Api() {
+        var datosApi = obtener20PaginasApi();
+        datosApi.stream().sorted(Comparator.comparing(DatosLibro::numeroDescargas).reversed())
+                .limit(10)
+                .forEach(Principal::mostrarLibroApi);
+    }
+
+    private void generarEstadisticasLibrosApi() {
+        var librosApi = obtener20PaginasApi();
+        generarEstadisticaApi(librosApi);
+    }
+
+    private List<DatosLibro> obtener20PaginasApi() {
+        String bodyResponse = ConsumoAPI.obtenerDatos(URL_BASE);
+        ResponseApi result = ConvierteDatos.convertirJsonStringA(bodyResponse, ResponseApi.class);
+        List<DatosLibro> librosApi = new ArrayList<>(result.libros());
+        while (result.siguientePagina() != null && !result.siguientePagina().contains("page=20")) {
+            bodyResponse = ConsumoAPI.obtenerDatos(result.siguientePagina());
+            result = ConvierteDatos.convertirJsonStringA(bodyResponse, ResponseApi.class);
+            librosApi.addAll(result.libros());
+        }
+        return librosApi;
+    }
+
+    private void generarEstadisticaApi(List<DatosLibro> librosApi) {
+        DoubleSummaryStatistics estadistica = librosApi.stream()
+                .mapToDouble(DatosLibro::numeroDescargas)
+                .summaryStatistics();
+
+        mostrarEstadistica(estadistica, "Libros registrados:");
+    }
+
+    private void generarEstadisticasLibrosRegistrados() {
+        var libros = servicioLibros.listarTodo();
+        generarEstadistica(libros);
+    }
+
+    private void generarEstadistica(List<Libro> libros) {
+        DoubleSummaryStatistics estadistica = libros.stream()
+                .mapToDouble(Libro::getNumeroDescargas)
+                .summaryStatistics();
+
+        mostrarEstadistica(estadistica, "Libros registrados:");
+    }
+
+    private void listarLibrosPorIdioma() {
         List<String> idiomas = obtenerIdiomas();
         System.out.print("Elija la opción a través de su número: ");
         var opcion2 = TECLADO.nextLine();
@@ -191,6 +266,20 @@ public class Principal {
                 """, libro.getTitulo(), libro.getAutor().getNombre(), libro.getIdioma(), libro.getNumeroDescargas());
     }
 
+    private static void mostrarLibroApi(DatosLibro libro) {
+        System.out.printf("""
+                
+                ************* LIBRO *********************
+                Título: %s
+                Autor: %s
+                Idioma: %s
+                Número de descargas: %d
+                ************* ***** *********************
+                """,
+                libro.titulo(), libro.autores().getFirst().nombre(),
+                libro.idiomas().getFirst(), libro.numeroDescargas());
+    }
+
     private static void mostrarAutor(Autor autor) {
         System.out.printf("""
                 
@@ -217,6 +306,28 @@ public class Principal {
                 0 - Regresar al menú anterior
                 """);
         return List.of("es", "en", "fr", "pt", "it", "fi");
+    }
+
+    private void mostrarEstadistica(DoubleSummaryStatistics estadistica, String librosLabel) {
+        System.out.printf("""
+                ******************** Estadísticas de %s ******************************
+                
+                Cantidad de libros: %d
+                Suma de descargas: %.0f
+                Mínimo número de descargas: %.0f
+                Máximo número de descargas: %.0f
+                Promedio de descargas: %.2f
+                
+                ******************** Estadísticas de %s ******************************
+                """,
+                librosLabel,
+                estadistica.getCount(),
+                estadistica.getSum(),
+                estadistica.getMin(),
+                estadistica.getMax(),
+                estadistica.getAverage(),
+                librosLabel
+        );
     }
 
 }
