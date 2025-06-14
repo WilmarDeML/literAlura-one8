@@ -1,4 +1,4 @@
-package com.wilmardeml.literalura.servicios;
+package com.wilmardeml.literalura.util;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;

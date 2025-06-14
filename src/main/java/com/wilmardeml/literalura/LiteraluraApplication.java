@@ -1,7 +1,7 @@
 package com.wilmardeml.literalura;
 
-import com.wilmardeml.literalura.repositorios.AutorRepositorio;
-import com.wilmardeml.literalura.repositorios.LibroRepositorio;
+import com.wilmardeml.literalura.servicios.serv.AutorServ;
+import com.wilmardeml.literalura.servicios.serv.LibroServ;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -9,13 +9,13 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class LiteraluraApplication implements CommandLineRunner {
 
-	private final LibroRepositorio libroRepositorio;
-	private final AutorRepositorio autorRepositorio;
+	private final AutorServ servicioAutores;
+	private final LibroServ servicioLibros;
 
-	LiteraluraApplication(LibroRepositorio libroRepositorio, AutorRepositorio autorRepositorio) {
-		this.libroRepositorio = libroRepositorio;
-		this.autorRepositorio = autorRepositorio;
-	}
+	LiteraluraApplication(AutorServ servicioAutores, LibroServ servicioLibros) {
+        this.servicioAutores = servicioAutores;
+        this.servicioLibros = servicioLibros;
+    }
 
 	public static void main(String[] args) {
 		SpringApplication.run(LiteraluraApplication.class, args);
@@ -23,6 +23,7 @@ public class LiteraluraApplication implements CommandLineRunner {
 
 	@Override
 	public void run(String... args) {
-		Principal.init(libroRepositorio, autorRepositorio);
+		Principal programa = new Principal(servicioLibros, servicioAutores);
+		programa.init();
 	}
 }

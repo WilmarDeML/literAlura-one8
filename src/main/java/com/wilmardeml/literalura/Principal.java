@@ -1,27 +1,29 @@
 package com.wilmardeml.literalura;
 
 import com.wilmardeml.literalura.modelos.*;
-import com.wilmardeml.literalura.repositorios.AutorRepositorio;
-import com.wilmardeml.literalura.repositorios.LibroRepositorio;
-import com.wilmardeml.literalura.servicios.ConsumoAPI;
-import com.wilmardeml.literalura.servicios.ConvierteDatos;
+import com.wilmardeml.literalura.servicios.impl.client.ConsumoAPI;
+import com.wilmardeml.literalura.util.ConvierteDatos;
+import com.wilmardeml.literalura.servicios.serv.AutorServ;
+import com.wilmardeml.literalura.servicios.serv.LibroServ;
 
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class Principal {
     private final static Scanner TECLADO = new Scanner(System.in);
-    private final static String URL_BASE = "https://gutendex.com/books/?search=";
+    private final static String URL_BASE = "https://gutendex.com/books/";
 
-    private static LibroRepositorio libroRepositorio;
-    private static AutorRepositorio autorRepositorio;
+    private final LibroServ servicioLibros;
+    private final AutorServ servicioAutores;
 
     private static String opcion = "-1";
 
-    public static void init(LibroRepositorio lRepositorio, AutorRepositorio aRepositorio) {
-        libroRepositorio = lRepositorio;
-        autorRepositorio = aRepositorio;
+    public Principal(LibroServ servicioLibros, AutorServ servicioAutores) {
+        this.servicioLibros = servicioLibros;
+        this.servicioAutores = servicioAutores;
+    }
+
+    public void init() {
         while (!opcion.equals("0")) {
             mostrarMenu();
             System.out.print("Elija la opción a través de su número: ");
@@ -136,7 +138,7 @@ public class Principal {
         var opcion2 = TECLADO.nextLine();
         var indice = obtenerEntero(opcion2) - 1;
         if (indice >= 0 && indice < idiomas.size()) {
-            List<Libro> libros = libroRepositorio.findAllByIdioma(idiomas.get(indice));
+            List<Libro> libros = servicioLibros.buscarPorIdioma(idiomas.get(indice));
             if (libros.isEmpty()) {
                 System.out.printf("No se encontraron libros con el idioma %s", idiomas.get(indice));
                 return;
@@ -148,7 +150,7 @@ public class Principal {
         System.out.println("¡Opción inválida, intenta de nuevo!");
     }
 
-    private static void listarAutoresVivos() {
+    private void listarAutoresVivos() {
         System.out.print("Ingrese el año vivo de autor(es) que desea buscar: ");
         var opcion2 = TECLADO.nextLine();
         var anio = obtenerEntero(opcion2);
@@ -158,30 +160,30 @@ public class Principal {
             return;
         }
 
-        List<Autor> autores = autorRepositorio.findByAnioMuerteGreaterThanAndAnioNacimientoLessThan(anio, anio);
+        List<Autor> autores = servicioAutores.buscarAutoresVivosEn(anio, anio);
         System.out.printf("******************* Autores vivos en %d **************************", anio);
         autores.forEach(Principal::mostrarAutor);
         System.out.printf("******************* Fin Autores vivos en %d **************************%n", anio);
     }
 
-    private static void listarAutores() {
-        List<Autor> autores = autorRepositorio.findAllBy();
+    private void listarAutores() {
+        List<Autor> autores = servicioAutores.listarTodo();
         System.out.println("******************* Autores Registrados **************************");
         autores.forEach(Principal::mostrarAutor);
         System.out.println("******************* Fin Autores Registrados **************************");
     }
 
-    private static void listarLibros() {
-        List<Libro> libros = libroRepositorio.findAllBy();
+    private void listarLibros() {
+        List<Libro> libros = servicioLibros.listarTodo();
         System.out.println("******************* Libros Registrados **************************");
         libros.forEach(Principal::mostrarLibro);
         System.out.println("******************* Fin Libros Registrados **************************");
     }
 
-    private static void buscarLibroPorTitulo() {
+    private void buscarLibroPorTitulo() {
         System.out.print("Ingrese el nombre del libro que desea buscar: ");
         var titulo = TECLADO.nextLine();
-        String bodyResponse = ConsumoAPI.obtenerDatos(URL_BASE.concat(titulo.replace(" ", "+")));
+        String bodyResponse = ConsumoAPI.obtenerDatos(URL_BASE.concat("?search=").concat(titulo.replace(" ", "+")));
         ResponseApi result = ConvierteDatos.convertirJsonStringA(bodyResponse, ResponseApi.class);
         if (result.totalLibros().equals(0)) {
             System.out.println("El libro ".concat(titulo).concat(" no fue encontrado!"));
@@ -195,7 +197,7 @@ public class Principal {
         elegirLibroParaRegistrar(result.libros(), result.totalLibros());
     }
 
-    private static void elegirLibroParaRegistrar(List<DatosLibro> libros, Integer totalLibros) {
+    private void elegirLibroParaRegistrar(List<DatosLibro> libros, Integer totalLibros) {
         System.out.printf("%d / %d libros%n", libros.size(), totalLibros);
         for (int i = 0; i < libros.size(); i++) {
             var libro = libros.get(i);
@@ -225,8 +227,8 @@ public class Principal {
         }
     }
 
-    private static void registrarLibro(DatosLibro datosLibro) {
-        var libroBuscado = libroRepositorio.findByTitulo(datosLibro.titulo());
+    private void registrarLibro(DatosLibro datosLibro) {
+        var libroBuscado = servicioLibros.buscarPorTitulo(datosLibro.titulo());
         if (libroBuscado != null) {
             System.out.println("¡El libro ".concat(libroBuscado.getTitulo()).concat(" ya está registrado!"));
             mostrarLibro(libroBuscado);
@@ -239,7 +241,7 @@ public class Principal {
         System.out.println("Registrando libro en base de datos...");
 
         Libro nuevoLibro = new Libro(datosLibro);
-        Autor autor = autorRepositorio.findByNombre(datosLibro.autores().getFirst().nombre());
+        Autor autor = servicioAutores.buscarPorNombre(datosLibro.autores().getFirst().nombre());
 
         if (autor == null) {
             autor = new Autor(datosLibro.autores().getFirst());
@@ -248,7 +250,7 @@ public class Principal {
         nuevoLibro.setAutor(autor);
         autor.getLibros().add(nuevoLibro);
 
-        autorRepositorio.save(autor); // Salva también el libro porque está en Cascade.ALL
+        servicioAutores.guardar(autor); // Salva también el libro porque está en Cascade.ALL
 
         System.out.println("Libro ".concat(nuevoLibro.getTitulo()).concat(" registrado satisfactoriamente!"));
         mostrarLibro(nuevoLibro);

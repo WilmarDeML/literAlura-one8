@@ -1,4 +1,4 @@
-package com.wilmardeml.literalura.servicios;
+package com.wilmardeml.literalura.servicios.impl.client;
 
 import java.io.IOException;
 import java.net.URI;
